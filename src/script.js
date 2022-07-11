@@ -1,6 +1,15 @@
 const GRID_SIZE = 9;
 let currentSelectedId = -1;
 
+const InteractionMode = {
+    NoneSelected: 0,
+    SettingNewPuzzle: 1,
+    FullValueMode: 2,
+    PencilMode: 3
+}
+
+let currentInteractionMode = InteractionMode.NoneSelected;
+
 const initHTML = () => {
     let grid = document.getElementById('grid');
 
@@ -29,7 +38,7 @@ const initHTML = () => {
 window.onload = initHTML;
 
 const handleSquareSelected = (id) => {
-    if (currentSelectedId == id) return;
+    if (currentInteractionMode == InteractionMode.NoneSelected || currentSelectedId == id) return;
 
     if (currentSelectedId != -1) {
         let prevSelected = document.getElementById(currentSelectedId);
@@ -49,3 +58,33 @@ const handleKeyPress = (e) => {
 };
 
 document.onkeydown = (e) => handleKeyPress(e);
+
+const startNew = () => {
+    let informationText = document.getElementById('informationText');
+    let startButton = document.getElementById('startButton');
+    let loadButton = document.getElementById('loadButton');
+
+    if(currentInteractionMode == InteractionMode.NoneSelected) {
+        currentInteractionMode = InteractionMode.SettingNewPuzzle;
+        informationText.textContent = 'Click on squares to select and then input value - ' + 
+                                        'once initial configuration loaded press above to start solving';
+        startButton.textContent = 'Start Solving';
+        loadButton.textContent = 'Cancel Creation';
+    } else if (currentInteractionMode == InteractionMode.SettingNewPuzzle) {
+        console.log('running code');
+        currentInteractionMode = InteractionMode.FullValueMode;
+        informationText.textContent = 'Press above to toggle pencil mode or delete the current selection';
+        startButton.textContent = 'Pencil Mode';
+        loadButton.textContent = 'Delete Selected Value';
+    } else if (currentInteractionMode == InteractionMode.FullValueMode) {
+        currentInteractionMode = InteractionMode.PencilMode
+        startButton.textContent = 'Value Mode';
+    } else if (currentInteractionMode == InteractionMode.PencilMode) {
+        currentInteractionMode = InteractionMode.FullValueMode;
+        startButton.textContent = 'Pencil Mode';
+    }
+}
+
+const loadPrevious = () => {
+    console.log('Loading Previous Puzzle... Functionality coming soon');
+}
