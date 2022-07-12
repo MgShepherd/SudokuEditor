@@ -1,6 +1,7 @@
 const GRID_SIZE = 9;
 let currentSelectedIds = [];
 let mouseButtonPressed = false;
+let commandKeyPressed = false;
 
 const InteractionMode = {
     NoneSelected: 0,
@@ -31,13 +32,15 @@ const initHTML = () => {
             gridSquare.onclick = () => handleMouseDragged(gridSquare.id, true);
             gridSquare.onmouseenter = () => handleMouseDragged(gridSquare.id);
             gridSquare.onmousedown = () => {
-                 clearPreviousSelections(); 
+                if (!commandKeyPressed) {
+                    clearPreviousSelections();
+                } 
                  mouseButtonPressed = true;
                  handleMouseDragged(gridSquare.id);
             }
 
 
-            let valueTextTag = document.createElement('h2');
+            let valueTextTag = document.createElement('p');
             gridSquare.appendChild(valueTextTag);
 
             grid.appendChild(gridSquare);
@@ -55,16 +58,28 @@ const clearPreviousSelections = () => {
     currentSelectedIds = [];
 }
 
-window.onload = initHTML;
-
 const handleKeyPress = (e) => {
     if (currentSelectedIds.length != 0 && !isNaN(e.key)) { 
         for (const id of currentSelectedIds) {
             let element = document.getElementById(id);
             element.firstChild.textContent = e.key;
+
+            if (currentInteractionMode == InteractionMode.SettingNewPuzzle) {
+                element.firstChild.classList.add('givenNumber');
+            } else if (currentInteractionMode == InteractionMode.FullValueMode) {
+                element.firstChild.classList.add('solvingNumber');
+            }
         }
+    } else if (e.key == 'Meta' || e.key == 'Control') {
+        commandKeyPressed = true;
     }
 };
+
+const handleKeyRelease = (e) => {
+    if (e.key == 'Meta' || e.key == 'Control') {
+        commandKeyPressed = false;
+    }
+}
 
 const handleMouseDragged = (id, isClickEvent = false) => {
     if (currentInteractionMode == InteractionMode.NoneSelected) return;
@@ -75,8 +90,6 @@ const handleMouseDragged = (id, isClickEvent = false) => {
         currentSelectedIds.push(id);
     }
 }
-
-document.onkeydown = (e) => handleKeyPress(e);
 
 const startNew = () => {
     let informationText = document.getElementById('informationText');
@@ -107,3 +120,7 @@ const startNew = () => {
 const loadPrevious = () => {
     console.log('Loading Previous Puzzle... Functionality coming soon');
 }
+
+window.onload = initHTML;
+document.onkeydown = (e) => handleKeyPress(e);
+document.onkeyup = (e) => handleKeyRelease(e);

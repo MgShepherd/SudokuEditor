@@ -52,6 +52,15 @@ body {
     user-select: none;
 }
 
+.givenNumber {
+    font-weight: bold;
+    font-size: 36px;
+}
+
+.solvingNumber {
+    color: blue;
+}
+
 #informationText {
     margin: 0;
 }
