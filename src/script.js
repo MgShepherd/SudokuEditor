@@ -1,5 +1,6 @@
 const GRID_SIZE = 9;
-let currentSelectedId = -1;
+let currentSelectedIds = [];
+let mouseButtonPressed = false;
 
 const InteractionMode = {
     NoneSelected: 0,
@@ -13,6 +14,8 @@ let currentInteractionMode = InteractionMode.NoneSelected;
 const initHTML = () => {
     let grid = document.getElementById('grid');
 
+    grid.onmouseup = () => mouseButtonPressed = false;
+
     for(let y = 0; y < GRID_SIZE; y++) {
         for (let x = 0; x < GRID_SIZE; x++) {
             let gridSquare = document.createElement('div');
@@ -25,7 +28,14 @@ const initHTML = () => {
             }
 
             gridSquare.id = (y * GRID_SIZE) + x;
-            gridSquare.onclick = () => handleSquareSelected(gridSquare.id);
+            gridSquare.onclick = () => handleMouseDragged(gridSquare.id, true);
+            gridSquare.onmouseenter = () => handleMouseDragged(gridSquare.id);
+            gridSquare.onmousedown = () => {
+                 clearPreviousSelections(); 
+                 mouseButtonPressed = true;
+                 handleMouseDragged(gridSquare.id);
+            }
+
 
             let valueTextTag = document.createElement('h2');
             gridSquare.appendChild(valueTextTag);
@@ -35,27 +45,36 @@ const initHTML = () => {
     }
 }
 
-window.onload = initHTML;
-
-const handleSquareSelected = (id) => {
-    if (currentInteractionMode == InteractionMode.NoneSelected || currentSelectedId == id) return;
-
-    if (currentSelectedId != -1) {
-        let prevSelected = document.getElementById(currentSelectedId);
-        prevSelected.classList.remove('selected');
+const clearPreviousSelections = () => {
+    if (currentSelectedIds.length != 0) {
+        for (const oldId of currentSelectedIds) {
+            let prevSelected = document.getElementById(oldId);
+            prevSelected.classList.remove('selected');
+        }
     }
-
-    let newSelection = document.getElementById(id);
-    newSelection.classList.add('selected');
-    currentSelectedId = id;
+    currentSelectedIds = [];
 }
 
+window.onload = initHTML;
+
 const handleKeyPress = (e) => {
-    if (currentSelectedId != -1 && !isNaN(e.key)) { 
-        let currentElement = document.getElementById(currentSelectedId);
-        currentElement.firstChild.textContent = e.key;
+    if (currentSelectedIds.length != 0 && !isNaN(e.key)) { 
+        for (const id of currentSelectedIds) {
+            let element = document.getElementById(id);
+            element.firstChild.textContent = e.key;
+        }
     }
 };
+
+const handleMouseDragged = (id, isClickEvent = false) => {
+    if (currentInteractionMode == InteractionMode.NoneSelected) return;
+
+    if (mouseButtonPressed || isClickEvent) {
+        let newSelection = document.getElementById(id);
+        newSelection.classList.add('selected');
+        currentSelectedIds.push(id);
+    }
+}
 
 document.onkeydown = (e) => handleKeyPress(e);
 
