@@ -43,6 +43,10 @@ const initHTML = () => {
             let valueTextTag = document.createElement('p');
             gridSquare.appendChild(valueTextTag);
 
+            let pencilTextTag = document.createElement('p');
+            pencilTextTag.classList.add('pencilText');
+            gridSquare.appendChild(pencilTextTag);
+
             grid.appendChild(gridSquare);
         }
     }
@@ -62,16 +66,28 @@ const handleKeyPress = (e) => {
     if (currentSelectedIds.length != 0 && !isNaN(e.key)) { 
         for (const id of currentSelectedIds) {
             let element = document.getElementById(id);
-            element.firstChild.textContent = e.key;
 
             if (currentInteractionMode == InteractionMode.SettingNewPuzzle) {
                 element.firstChild.classList.add('givenNumber');
+                element.firstChild.textContent = e.key;
+                element.childNodes[1].textContent = "";
             } else if (currentInteractionMode == InteractionMode.FullValueMode) {
                 element.firstChild.classList.add('solvingNumber');
+                element.firstChild.textContent = e.key;
+                element.childNodes[1].textContent = "";
+            } else if (currentInteractionMode == InteractionMode.PencilMode) {
+                let currentValues = element.childNodes[1].textContent;
+                if (!currentValues.includes(e.key)) {
+                    element.childNodes[1].textContent += e.key;
+                }
             }
         }
     } else if (e.key == 'Meta' || e.key == 'Control') {
         commandKeyPressed = true;
+    } else if (e.key == 'p') {
+        togglePencilMode();
+    } else if (e.key == 'd') {
+        deleteValues();
     }
 };
 
@@ -103,22 +119,37 @@ const startNew = () => {
         startButton.textContent = 'Start Solving';
         loadButton.textContent = 'Cancel Creation';
     } else if (currentInteractionMode == InteractionMode.SettingNewPuzzle) {
-        console.log('running code');
         currentInteractionMode = InteractionMode.FullValueMode;
         informationText.textContent = 'Press above to toggle pencil mode or delete the current selection';
         startButton.textContent = 'Pencil Mode';
         loadButton.textContent = 'Delete Selected Value';
-    } else if (currentInteractionMode == InteractionMode.FullValueMode) {
-        currentInteractionMode = InteractionMode.PencilMode
+    } else {
+        togglePencilMode();
+    }
+}
+
+const togglePencilMode = () => {
+    if (currentInteractionMode == InteractionMode.FullValueMode) {
+        currentInteractionMode = InteractionMode.PencilMode;
         startButton.textContent = 'Value Mode';
-    } else if (currentInteractionMode == InteractionMode.PencilMode) {
+    } else {
         currentInteractionMode = InteractionMode.FullValueMode;
         startButton.textContent = 'Pencil Mode';
     }
 }
 
 const loadPrevious = () => {
-    console.log('Loading Previous Puzzle... Functionality coming soon');
+    if (currentInteractionMode == InteractionMode.PencilMode || currentInteractionMode == InteractionMode.FullValueMode) {
+        deleteValues();
+    }
+}
+
+const deleteValues = () => {
+    for (const id of currentSelectedIds) {
+        let element = document.getElementById(id);
+        element.firstChild.textContent = "";
+        element.childNodes[1].textContent = "";
+    }
 }
 
 window.onload = initHTML;

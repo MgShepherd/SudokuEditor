@@ -61,6 +61,10 @@ body {
     color: blue;
 }
 
+.pencilText {
+    font-size: 18px;
+}
+
 #informationText {
     margin: 0;
 }
