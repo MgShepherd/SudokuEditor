@@ -2,7 +2,7 @@ const GRID_SIZE = 9;
 let currentSelectedIds = [];
 let mouseButtonPressed = false;
 let commandKeyPressed = false;
-let keyAlreadyPressed = false;
+let keyAlreadyPressed = '';
 
 const InteractionMode = {
     NoneSelected: 0,
@@ -64,8 +64,8 @@ const clearPreviousSelections = () => {
 }
 
 const handleKeyPress = (e) => {
-    if (!keyAlreadyPressed) {
-        keyAlreadyPressed = true;
+    if (keyAlreadyPressed != e.key) {
+        keyAlreadyPressed = e.key;
         if (currentSelectedIds.length != 0 && !isNaN(e.key)) { 
             for (const id of currentSelectedIds) {
                 let element = document.getElementById(id);
@@ -81,7 +81,7 @@ const handleKeyPress = (e) => {
                     if (!currentValues.includes(e.key)) {
                         element.childNodes[1].textContent += e.key;
                     } else {
-                        element.childNodes[1].textContent.replace(e.key, "");
+                        element.childNodes[1].textContent = element.childNodes[1].textContent.replace(e.key, "");
                     }
                 }
             }
@@ -108,7 +108,9 @@ const handleKeyRelease = (e) => {
     if (e.key == 'Meta' || e.key == 'Control') {
         commandKeyPressed = false;
     }
-    keyAlreadyPressed = false;
+    else if (e.key == keyAlreadyPressed) {
+        keyAlreadyPressed = '';
+    }
 }
 
 const handleMouseDragged = (id, isClickEvent = false) => {
