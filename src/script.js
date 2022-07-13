@@ -2,6 +2,7 @@ const GRID_SIZE = 9;
 let currentSelectedIds = [];
 let mouseButtonPressed = false;
 let commandKeyPressed = false;
+let keyAlreadyPressed = false;
 
 const InteractionMode = {
     NoneSelected: 0,
@@ -63,44 +64,57 @@ const clearPreviousSelections = () => {
 }
 
 const handleKeyPress = (e) => {
-    if (currentSelectedIds.length != 0 && !isNaN(e.key)) { 
-        for (const id of currentSelectedIds) {
-            let element = document.getElementById(id);
+    if (!keyAlreadyPressed) {
+        keyAlreadyPressed = true;
+        if (currentSelectedIds.length != 0 && !isNaN(e.key)) { 
+            for (const id of currentSelectedIds) {
+                let element = document.getElementById(id);
 
-            if (currentInteractionMode == InteractionMode.SettingNewPuzzle) {
-                element.firstChild.classList.add('givenNumber');
-                element.firstChild.textContent = e.key;
-                element.childNodes[1].textContent = "";
-            } else if (currentInteractionMode == InteractionMode.FullValueMode) {
-                element.firstChild.classList.add('solvingNumber');
-                element.firstChild.textContent = e.key;
-                element.childNodes[1].textContent = "";
-            } else if (currentInteractionMode == InteractionMode.PencilMode) {
-                let currentValues = element.childNodes[1].textContent;
-                if (!currentValues.includes(e.key)) {
-                    element.childNodes[1].textContent += e.key;
+                if (currentInteractionMode == InteractionMode.SettingNewPuzzle) {
+                    element.firstChild.classList.add('givenNumber');
+                    handleNewValueAddedToSquare(e.key, element);
+                } else if (currentInteractionMode == InteractionMode.FullValueMode) {
+                    element.firstChild.classList.add('solvingNumber');
+                    handleNewValueAddedToSquare(e.key, element);
+                } else if (currentInteractionMode == InteractionMode.PencilMode) {
+                    let currentValues = element.childNodes[1].textContent;
+                    if (!currentValues.includes(e.key)) {
+                        element.childNodes[1].textContent += e.key;
+                    } else {
+                        element.childNodes[1].textContent.replace(e.key, "");
+                    }
                 }
             }
+        } else if (e.key == 'Meta' || e.key == 'Control') {
+            commandKeyPressed = true;
+        } else if (e.key == 'p') {
+            togglePencilMode();
+        } else if (e.key == 'd') {
+            deleteValues();
         }
-    } else if (e.key == 'Meta' || e.key == 'Control') {
-        commandKeyPressed = true;
-    } else if (e.key == 'p') {
-        togglePencilMode();
-    } else if (e.key == 'd') {
-        deleteValues();
     }
 };
+
+const handleNewValueAddedToSquare = (key, element) => {
+    if (key == element.firstChild.textContent) {
+        element.firstChild.textContent = "";
+    } else {
+        element.firstChild.textContent = key;
+    }
+    element.childNodes[1].textContent = "";
+}
 
 const handleKeyRelease = (e) => {
     if (e.key == 'Meta' || e.key == 'Control') {
         commandKeyPressed = false;
     }
+    keyAlreadyPressed = false;
 }
 
 const handleMouseDragged = (id, isClickEvent = false) => {
     if (currentInteractionMode == InteractionMode.NoneSelected) return;
 
-    if (mouseButtonPressed || isClickEvent) {
+    if ((mouseButtonPressed || isClickEvent) && !currentSelectedIds.includes(id)) {
         let newSelection = document.getElementById(id);
         newSelection.classList.add('selected');
         currentSelectedIds.push(id);
